@@ -5,7 +5,7 @@ const basicAuth = require('basic-auth');
 const app = express();
 const archiver = require('archiver');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 15099;
 const REPORTS_DIR = path.join(__dirname, 'reports');
 
 const auth = (req, res, next) => {
@@ -47,7 +47,9 @@ app.get('/api/reports', auth, (req, res) => {
   });
 });
 
-app.get('/api/atualizartodos', auth, (req, res) => {    
+app.get('/api/atualizartodos/:pasta', auth, (req, res) => {
+  const pasta = req.params.pasta;
+
   const options = {
     timeZone: 'America/Sao_Paulo',
     year: 'numeric',
@@ -59,35 +61,52 @@ app.get('/api/atualizartodos', auth, (req, res) => {
   };
   const dateTime = new Date().toLocaleString('pt-BR', options).replace(/\//g, '-');
   const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  console.log(`[${dateTime}] Requisição para baixar todos os relatórios recebida do IP ${ip}.`);
+  console.log(`[${dateTime}] Requisição para baixar todos os relatórios da pasta ${pasta} recebida do IP ${ip}.`);
 
-  const zipFileName = 'relatorios.zip';
-  const output = fs.createWriteStream(zipFileName);
-  const archive = archiver('zip', {
-    zlib: { level: 9 } // nível de compressão máximo
-  });
+  const pastaPath = path.join(REPORTS_DIR, pasta);
 
-  output.on('error', err => {
-    res.status(500).send({ error: err.message });
-  });
+  // Verifica se a pasta existe
+  fs.access(pastaPath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(404).send(`Pasta '${pasta}' não encontrada.`);
+    }
 
-  archive.pipe(output);
-  archive.directory(REPORTS_DIR, false);
-  archive.finalize();
+    // Cria o nome do arquivo zip
+    const zipFileName = `${pasta}.zip`;
 
-  output.on('close', () => {
-    res.download(zipFileName, zipFileName, (err) => {
-      if (err) {
-        console.error('Erro ao enviar o arquivo zip:', err);
-      }
-      fs.unlink(zipFileName, (err) => {
+    // Cria um fluxo de escrita para o arquivo zip
+    const output = fs.createWriteStream(zipFileName);
+    const archive = archiver('zip', {
+      zlib: { level: 9 } // nível de compressão máximo
+    });
+
+    output.on('error', err => {
+      res.status(500).send({ error: err.message });
+    });
+
+    // Define a pasta a ser compactada
+    archive.directory(pastaPath, false);
+
+    // Faz a compactação final e envia o arquivo zip para o cliente
+    archive.pipe(output);
+    archive.finalize();
+
+    output.on('close', () => {
+      res.download(zipFileName, zipFileName, (err) => {
         if (err) {
-          console.error('Erro ao excluir o arquivo zip:', err);
+          console.error('Erro ao enviar o arquivo zip:', err);
         }
+        // Após o download, exclui o arquivo zip
+        fs.unlink(zipFileName, (err) => {
+          if (err) {
+            console.error('Erro ao excluir o arquivo zip:', err);
+          }
+        });
       });
     });
   });
 });
+
 
 
 app.listen(PORT, () => {
