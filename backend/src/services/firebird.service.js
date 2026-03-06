@@ -24,23 +24,29 @@ const query = async (sql, params) => {
   const db = await attach();
 
   try {
-    await new Promise((resolve, reject) => {
-      db.query(sql, params, (error) => {
+    const rows = await new Promise((resolve, reject) => {
+      db.query(sql, params, (error, result) => {
         if (error) {
           reject(error);
           return;
         }
-        resolve();
+        resolve(result);
       });
     });
-    return true;
+    return rows;
   } finally {
     await detach(db);
   }
 };
 
+const execute = async (sql, params) => {
+  await query(sql, params);
+  return true;
+};
+
 module.exports = {
   attach,
   detach,
-  query
+  query,
+  execute
 };
