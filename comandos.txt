@@ -1,0 +1,6 @@
+Gerar senha hash banco: npm run password:hash -- --NovaSenha
+
+
+UPDATE USUARIOS_PAINEL
+SET SENHA_HASH = 'e7c5d8587db078a14a4713d58403b4040c8a7e6c57b9a52d8c0f3cd270b95f04'
+WHERE LOGIN = 'MATEUS';

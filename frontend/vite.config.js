@@ -8,6 +8,8 @@ export default defineConfig(({ mode }) => {
     base: '/painel/',
     plugins: [react()],
     server: {
+      host: env.VITE_HOST || '0.0.0.0',
+      allowedHosts: [env.VITE_ALLOWED_HOST || 'herasis.ddns.net'],
       port: Number(env.VITE_PORT || 15140),
       proxy: {
         '/api': {
