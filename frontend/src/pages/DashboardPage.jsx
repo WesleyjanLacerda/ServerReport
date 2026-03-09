@@ -32,7 +32,6 @@ const DashboardPage = () => {
     ...getDefaultDateRange(),
     empresa: '',
     status: '',
-    webhookStatus: '',
     revisado: 'N',
     page: 1,
     limit: 20
@@ -41,7 +40,6 @@ const DashboardPage = () => {
     total: 0,
     sucesso: 0,
     erro: 0,
-    webhookFalhou: 0,
     pendentesRevisao: 0
   });
   const [alerts, setAlerts] = useState([]);
@@ -126,7 +124,6 @@ const DashboardPage = () => {
       ...getDefaultDateRange(),
       empresa: '',
       status: '',
-      webhookStatus: '',
       revisado: 'N',
       page: 1,
       limit: filters.limit

@@ -21,7 +21,7 @@ const BackupFilters = ({ empresas, filters, onSubmit, onClear }) => {
     <section className="mt-6 rounded-[28px] border border-stroke bg-white p-5 shadow-panel sm:p-6">
       <div className="mb-5">
         <h2 className="text-xl font-semibold text-ink">Filtros</h2>
-        <p className="text-sm text-slate-500">Os filtros ficam em uma faixa compacta para consulta rápida.</p>
+        <p className="text-sm text-slate-500">Os filtros ficam em uma faixa compacta para consulta rapida.</p>
       </div>
 
       <div className="overflow-x-auto pb-2">
@@ -52,15 +52,6 @@ const BackupFilters = ({ empresas, filters, onSubmit, onClear }) => {
               <option value="">Todos</option>
               <option value="SUCESSO">SUCESSO</option>
               <option value="ERRO">ERRO</option>
-            </select>
-          </label>
-
-          <label className="block min-w-[150px]">
-            <span className="mb-2 block text-sm font-medium text-slate-600">Webhook</span>
-            <select className="w-full rounded-2xl border border-stroke bg-slate-50 px-3 py-2.5 text-sm" name="webhookStatus" value={formState.webhookStatus} onChange={handleChange}>
-              <option value="">Todos</option>
-              <option value="ENVIADO">ENVIADO</option>
-              <option value="FALHOU">FALHOU</option>
             </select>
           </label>
 

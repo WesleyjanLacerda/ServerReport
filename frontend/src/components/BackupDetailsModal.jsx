@@ -13,7 +13,6 @@ const fields = [
   ['Tamanho', 'tamanhoBytes'],
   ['Data/Hora', 'dataHoraUpload'],
   ['Mensagem de erro', 'mensagemErro'],
-  ['Webhook resposta', 'webhookResposta'],
   ['Data/Hora revisao', 'dataHoraRevisao'],
   ['Usuario revisao', 'usuarioRevisao'],
   ['Observacao revisao', 'obsRevisao']
@@ -58,9 +57,6 @@ const BackupDetailsModal = ({ item, onClose, onReview, onUnreview, actionLoading
 
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge tone={item.status === 'ERRO' ? 'error' : 'success'}>{item.status || '-'}</StatusBadge>
-              <StatusBadge tone={item.webhookStatus === 'FALHOU' ? 'warning' : 'success'}>
-                {item.webhookStatus || '-'}
-              </StatusBadge>
               <StatusBadge tone={item.revisado ? 'info' : 'neutral'}>
                 {item.revisado ? 'REVISADO' : 'NAO REVISADO'}
               </StatusBadge>
@@ -104,15 +100,6 @@ const BackupDetailsModal = ({ item, onClose, onReview, onUnreview, actionLoading
                 <p className="mt-2 break-words text-sm leading-7 text-slate-700">{formatValue(field, item[field])}</p>
               </div>
             ))}
-
-            <div className="rounded-3xl border border-stroke bg-slate-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Webhook status</p>
-              <div className="mt-3">
-                <StatusBadge tone={item.webhookStatus === 'FALHOU' ? 'warning' : 'success'}>
-                  {item.webhookStatus || '-'}
-                </StatusBadge>
-              </div>
-            </div>
 
             <div className="rounded-3xl border border-stroke bg-slate-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Revisado</p>

@@ -6,24 +6,11 @@ const { formatDateTimePtBr } = require('../utils/date.utils');
 const { sanitizeFilename, sanitizePathSegment, resolvePathInsideBase } = require('../utils/path.utils');
 const { getClientIp, getOriginHost } = require('../utils/request.utils');
 const { insertBackupUploadLog } = require('../services/backup-upload-log.service');
-const { postBackupLog } = require('../services/webhook.service');
 
 const getLogLabel = (value) => {
   if (value == null) return '-';
   const normalized = String(value).trim();
   return normalized || '-';
-};
-
-const formatBubbleResponse = (value) => {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  try {
-    return JSON.stringify(value);
-  } catch (error) {
-    return String(value);
-  }
 };
 
 const uploadBackup = (req, res) => {
@@ -63,48 +50,20 @@ const uploadBackup = (req, res) => {
   const filePath = path.join(backupPath, safeFileName);
   const finishSuccessFlow = () => {
     res.status(200).send('Arquivo enviado e salvo com sucesso.');
-
-    const data = {
-      empresaPasta: pasta,
-      filePasta: filePath
-    };
-
-    postBackupLog(data)
-      .then((response) => {
-        const bubbleResponse = formatBubbleResponse(response.data);
-        console.log(`[${dateTime}][${empresaLog}-${usuarioLog}][${pasta}] Bubble ${bubbleResponse}.`);
-        insertBackupUploadLog({
-          empresa: pasta,
-          usuario,
-          ipOrigem: ip,
-          hostOrigem,
-          caminhoArquivo: filePath,
-          nomeArquivo: safeFileName,
-          tamanhoBytes: req.file.size,
-          dataHoraUpload: new Date(),
-          status: 'SUCESSO',
-          mensagemErro: null,
-          webhookStatus: 'ENVIADO',
-          webhookResposta: bubbleResponse
-        });
-      })
-      .catch((error) => {
-        console.log(`[${dateTime}][${empresaLog}-${usuarioLog}][${pasta}] Bubble ${error.message || String(error)}.`);
-        insertBackupUploadLog({
-          empresa: pasta,
-          usuario,
-          ipOrigem: ip,
-          hostOrigem,
-          caminhoArquivo: filePath,
-          nomeArquivo: safeFileName,
-          tamanhoBytes: req.file.size,
-          dataHoraUpload: new Date(),
-          status: 'SUCESSO',
-          mensagemErro: null,
-          webhookStatus: 'FALHOU',
-          webhookResposta: error.message || String(error)
-        });
-      });
+    insertBackupUploadLog({
+      empresa: pasta,
+      usuario,
+      ipOrigem: ip,
+      hostOrigem,
+      caminhoArquivo: filePath,
+      nomeArquivo: safeFileName,
+      tamanhoBytes: req.file.size,
+      dataHoraUpload: new Date(),
+      status: 'SUCESSO',
+      mensagemErro: null,
+      webhookStatus: null,
+      webhookResposta: null
+    });
   };
 
   fs.mkdir(backupPath, { recursive: true }, (mkdirError) => {

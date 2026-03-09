@@ -1,6 +1,14 @@
 import StatusBadge from './StatusBadge';
 import { formatBytes, formatDateTime } from '../utils/formatters';
 
+const getDisplayUser = (item) => {
+  if (item.revisado) {
+    return item.usuarioRevisao || item.usuario || '-';
+  }
+
+  return item.usuario || '-';
+};
+
 const BackupTable = ({ items, loading, actionLoadingId, onReview, onUnreview, onViewDetails }) => {
   if (loading) {
     return <div className="py-10 text-sm text-slate-500">Carregando logs...</div>;
@@ -21,9 +29,8 @@ const BackupTable = ({ items, loading, actionLoadingId, onReview, onUnreview, on
             <th className="px-3">Arquivo</th>
             <th className="px-3">Tamanho</th>
             <th className="px-3">Status</th>
-            <th className="px-3">Webhook</th>
-            <th className="px-3">Usuário</th>
-            <th className="px-3">Ações</th>
+            <th className="px-3">Usuario</th>
+            <th className="px-3">Acoes</th>
           </tr>
         </thead>
         <tbody>
@@ -41,12 +48,7 @@ const BackupTable = ({ items, loading, actionLoadingId, onReview, onUnreview, on
               <td className="px-3 py-4">
                 <StatusBadge tone={item.status === 'ERRO' ? 'error' : 'success'}>{item.status || '-'}</StatusBadge>
               </td>
-              <td className="px-3 py-4">
-                <StatusBadge tone={item.webhookStatus === 'FALHOU' ? 'warning' : 'success'}>
-                  {item.webhookStatus || '-'}
-                </StatusBadge>
-              </td>
-              <td className="px-3 py-4">{item.usuario || '-'}</td>
+              <td className="px-3 py-4">{getDisplayUser(item)}</td>
               <td className="rounded-r-3xl px-3 py-4">
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={() => onViewDetails(item)} className="rounded-xl border border-stroke px-3 py-2 text-xs font-semibold text-slate-700">
