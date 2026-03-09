@@ -7,7 +7,8 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "migrate:backup-review-columns": "node src/scripts/apply-backup-review-columns.js",
-    "migrate:panel-users": "node src/scripts/apply-panel-users-table.js"
+    "migrate:panel-users": "node src/scripts/apply-panel-users-table.js",
+    "dedupe:backup-upload-log": "node src/scripts/dedupe-backup-upload-log.js"
   },
   "keywords": [],
   "author": "",

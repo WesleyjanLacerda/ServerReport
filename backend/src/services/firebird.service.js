@@ -44,9 +44,51 @@ const execute = async (sql, params) => {
   return true;
 };
 
+const withTransaction = async (handler) => {
+  const db = await attach();
+
+  try {
+    const transaction = await new Promise((resolve, reject) => {
+      db.transaction(firebird.ISOLATION_READ_COMMITTED, (error, tx) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve(tx);
+      });
+    });
+
+    try {
+      const result = await handler(transaction);
+
+      await new Promise((resolve, reject) => {
+        transaction.commit((error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+
+          resolve();
+        });
+      });
+
+      return result;
+    } catch (error) {
+      await new Promise((resolve) => {
+        transaction.rollback(() => resolve());
+      });
+      throw error;
+    }
+  } finally {
+    await detach(db);
+  }
+};
+
 module.exports = {
   attach,
   detach,
   query,
-  execute
+  execute,
+  withTransaction
 };
