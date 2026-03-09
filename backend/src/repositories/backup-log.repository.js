@@ -243,10 +243,57 @@ const getBackupLogSummary = async (filters) => {
   };
 };
 
+const normalizeAlertRow = (row) => ({
+  id: row.ID,
+  empresa: row.EMPRESA,
+  horasLimiteSemBackup: Number(row.HORAS_LIMITE_SEM_BACKUP || 24),
+  observacao: trimNullableString(row.OBSERVACAO),
+  ultimoBackupEm: row.ULTIMO_BACKUP_EM,
+  statusAlerta: row.ULTIMO_BACKUP_EM ? 'backup_atrasado' : 'nunca_enviou_backup'
+});
+
+const listCompaniesWithoutRecentBackup = async () => {
+  const sql = `
+    SELECT
+      monitoradas.ID,
+      monitoradas.EMPRESA,
+      COALESCE(NULLIF(monitoradas.HORAS_LIMITE_SEM_BACKUP, 0), 24) AS HORAS_LIMITE_SEM_BACKUP,
+      monitoradas.OBSERVACAO,
+      ultimo.ULTIMO_BACKUP_EM
+    FROM EMPRESAS_BACKUP_MONITORADAS monitoradas
+    LEFT JOIN (
+      SELECT
+        TRIM(EMPRESA) AS EMPRESA,
+        MAX(DATA_HORA_UPLOAD) AS ULTIMO_BACKUP_EM
+      FROM BACKUP_UPLOAD_LOG
+      WHERE EMPRESA IS NOT NULL
+      GROUP BY TRIM(EMPRESA)
+    ) ultimo
+      ON ultimo.EMPRESA = TRIM(monitoradas.EMPRESA)
+    WHERE COALESCE(monitoradas.ATIVO, 'S') = 'S'
+      AND COALESCE(monitoradas.OBRIGA_BACKUP, 'S') = 'S'
+      AND COALESCE(monitoradas.EXIBIR_ALERTA, 'S') = 'S'
+      AND (
+        ultimo.ULTIMO_BACKUP_EM IS NULL
+        OR ultimo.ULTIMO_BACKUP_EM < DATEADD(
+          -COALESCE(NULLIF(monitoradas.HORAS_LIMITE_SEM_BACKUP, 0), 24) HOUR TO CURRENT_TIMESTAMP
+        )
+      )
+    ORDER BY
+      CASE WHEN ultimo.ULTIMO_BACKUP_EM IS NULL THEN 0 ELSE 1 END,
+      ultimo.ULTIMO_BACKUP_EM ASC,
+      monitoradas.EMPRESA ASC
+  `;
+
+  const rows = await query(sql, []);
+  return rows.map(normalizeAlertRow);
+};
+
 module.exports = {
   countBackupLogs,
   findBackupLogById,
   getBackupLogSummary,
+  listCompaniesWithoutRecentBackup,
   listBackupLogs,
   listDistinctCompanies,
   markBackupLogAsReviewed,

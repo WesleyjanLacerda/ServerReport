@@ -85,11 +85,21 @@ const unreviewBackup = async (id) => {
 
 const getSummary = async (filters) => repository.getBackupLogSummary(withDefaultDateRange(filters));
 
+const listWithoutRecentBackupAlerts = async () => {
+  const items = await repository.listCompaniesWithoutRecentBackup();
+
+  return {
+    items,
+    total: items.length
+  };
+};
+
 module.exports = {
   getBackupDetails,
   getSummary,
   listBackups,
   listCompanies,
+  listWithoutRecentBackupAlerts,
   reviewBackup,
   unreviewBackup
 };

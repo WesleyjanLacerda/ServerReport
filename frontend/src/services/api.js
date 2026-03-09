@@ -33,6 +33,11 @@ export const fetchBackupCompanies = async () => {
   return response.data;
 };
 
+export const fetchBackupMissingAlerts = async () => {
+  const response = await api.get('/api/painel/backups/alertas/sem-backup');
+  return response.data;
+};
+
 export const fetchBackupDetails = async (id) => {
   const response = await api.get(`/api/painel/backups/${id}`);
   return response.data;

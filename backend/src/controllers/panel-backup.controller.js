@@ -100,11 +100,21 @@ const getSummary = async (req, res, next) => {
   }
 };
 
+const listWithoutRecentBackupAlerts = async (req, res, next) => {
+  try {
+    const result = await panelBackupService.listWithoutRecentBackupAlerts();
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getBackupDetails,
   getSummary,
   listBackups,
   listCompanies,
+  listWithoutRecentBackupAlerts,
   reviewBackup,
   unreviewBackup
 };

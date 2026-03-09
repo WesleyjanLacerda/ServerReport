@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SummaryCards from '../components/SummaryCards';
+import BackupAlertsCard from '../components/BackupAlertsCard';
 import BackupFilters from '../components/BackupFilters';
 import BackupTable from '../components/BackupTable';
 import BackupDetailsModal from '../components/BackupDetailsModal';
@@ -8,6 +9,7 @@ import Pagination from '../components/Pagination';
 import Toast from '../components/Toast';
 import {
   fetchBackupCompanies,
+  fetchBackupMissingAlerts,
   fetchBackupSummary,
   fetchBackups,
   markReviewed,
@@ -42,6 +44,7 @@ const DashboardPage = () => {
     webhookFalhou: 0,
     pendentesRevisao: 0
   });
+  const [alerts, setAlerts] = useState([]);
   const [items, setItems] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
   const [empresas, setEmpresas] = useState([]);
@@ -84,12 +87,14 @@ const DashboardPage = () => {
     setError('');
 
     try {
-      const [summaryResponse, backupsResponse] = await Promise.all([
+      const [summaryResponse, backupsResponse, alertsResponse] = await Promise.all([
         fetchBackupSummary(activeFilters),
-        fetchBackups(activeFilters)
+        fetchBackups(activeFilters),
+        fetchBackupMissingAlerts()
       ]);
 
       setSummary(summaryResponse);
+      setAlerts(alertsResponse.items || []);
       setItems(backupsResponse.items || []);
       setPagination(backupsResponse.pagination || { page: 1, limit: activeFilters.limit, total: 0, totalPages: 0 });
     } catch (err) {
@@ -216,6 +221,7 @@ const DashboardPage = () => {
         </header>
 
         <SummaryCards summary={summary} />
+        <BackupAlertsCard items={alerts} />
 
         <BackupFilters
           empresas={empresas}
